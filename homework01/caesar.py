@@ -39,7 +39,13 @@ def decrypt_caesar(ciphertext: str, shift: int = 3) -> str:
     ''
     """
     plaintext = ""
-    # PUT YOUR CODE HERE
+    for cipher in ciphertext:
+        if "A" <= cipher <= "z":
+            symbol = ord(cipher) - shift % 26
+            if ("a" <= cipher <= "z" and symbol < ord("a")) or symbol < ord("A"):
+                symbol += 26
+            cipher = chr(symbol)
+        plaintext += cipher
     return plaintext
 
 
