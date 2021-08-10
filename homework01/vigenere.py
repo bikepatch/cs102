@@ -10,7 +10,20 @@ def encrypt_vigenere(plaintext: str, keyword: str) -> str:
     'LXFOPVEFRNHR'
     """
     ciphertext = ""
-    # PUT YOUR CODE HERE
+    for i, symbol in enumerate(plaintext):
+        cipher = symbol
+        if 'A' <= symbol <= 'z':
+            length = len(keyword)
+            shift = ord(keyword[i % length])
+            if 'a' <= symbol <= 'z':
+                shift -= ord('a')
+            else:
+                shift -= ord('A')
+            enc = ord(symbol) + shift
+            if ('a' <= symbol <= 'z' and enc > ord('z')) or ('A' <= symbol <= 'Z' and enc > ord('Z')):
+                enc -= 26
+            cipher = chr(enc)
+        ciphertext += cipher
     return ciphertext
 
 
