@@ -169,7 +169,23 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
     """ Если решение solution верно, то вернуть True, в противном случае False """
     # TODO: Add doctests with bad puzzles
-    pass
+    for i in range(len(solution)):
+        pos = i, 0
+        row = get_row(solution, pos)
+        if len(row) != len(set(row).difference(set('.'))):
+            return False
+    for i in range(len(solution)):
+        pos = 0, i
+        col = get_col(solution, pos)
+        if len(col) != len(set(col).difference(set('.'))):
+            return False
+    for i in (0, 3, 6):
+        for j in (0, 3, 6):
+            pos = i, j
+            block = get_block(solution, pos)
+            if len(block) != len(set(block).difference(set('.'))):
+                return False
+    return True
 
 
 def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
