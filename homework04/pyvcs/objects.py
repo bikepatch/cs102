@@ -24,8 +24,15 @@ def hash_object(data: bytes, fmt: str, write: bool = False) -> str:
 
 
 def resolve_object(obj_name: str, gitdir: pathlib.Path) -> tp.List[str]:
-    # PUT YOUR CODE HERE
-    ...
+    if len(obj_name) < 4 or len(obj_name) > 40:
+        raise Exception(f"Not a valid object name {obj_name}")
+    obj = []
+    path = repo_find(gitdir) / "objects" / obj_name[:2]
+    for file in (path).glob(f"{obj_name[2:]}*"):
+        obj.append(obj_name[:2] + file.name)
+    if len(obj) == 0:
+        raise Exception(f"Not a valid object name {obj_name}")
+    return obj
 
 
 def find_object(obj_name: str, gitdir: pathlib.Path) -> str:
@@ -34,18 +41,38 @@ def find_object(obj_name: str, gitdir: pathlib.Path) -> str:
 
 
 def read_object(sha: str, gitdir: pathlib.Path) -> tp.Tuple[str, bytes]:
-    # PUT YOUR CODE HERE
-    ...
+    path = repo_find(gitdir) / "objects" / sha[:2] 
+    with open(path / sha[2:], "rb") as f:
+        z_data = zlib.decompress(f.read())
+    header = z_data.split(b" ")[0]
+    obj = z_data[z_data.find(b"\x00") + 1 :]
+    return header.decode(), obj
 
 
 def read_tree(data: bytes) -> tp.List[tp.Tuple[int, str, str]]:
-    # PUT YOUR CODE HERE
-    ...
+    tree = []
+    while len(data) != 0:
+        data = data[data.find(b" ") + 1 :]
+        data = data[data.find(b"\x00") + 1 :]
+        sha = bytes.hex(data[:20])
+        mode = int(data[: data.find(b" ")].decode())
+        name = data[: data.find(b"\x00")].decode()
+        data = data[20:]
+        tree.append((mode, name, sha))
+    return tree
 
 
 def cat_file(obj_name: str, pretty: bool = True) -> None:
-    # PUT YOUR CODE HERE
-    ...
+    repo = repo_find()
+    header, data = read_object(obj_name, repo)
+    if header in ["blob", "commit"]:
+        print(data.decode())
+    else:
+        for leaf in read_tree(data):
+            if i[0] == 40000:
+                print(f"{leaf[0]:06}", "tree", leaf[1] + "\t" + leaf[2])
+            else:
+                print(f"{leaf[0]:06}", "blob", leaf[1] + "\t" + leaf[2])
 
 
 def find_tree_files(tree_sha: str, gitdir: pathlib.Path) -> tp.List[tp.Tuple[str, str]]:
