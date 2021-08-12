@@ -77,10 +77,25 @@ def cat_file(obj_name: str, pretty: bool = True) -> None:
 
 
 def find_tree_files(tree_sha: str, gitdir: pathlib.Path) -> tp.List[tp.Tuple[str, str]]:
-    # PUT YOUR CODE HERE
-    ...
+    info = []
+    header, data = read_object(tree_sha, gitdir)
+    for file in read_tree(data):
+        if read_object(file[2], gitdir)[0] == "tree":
+            tree = find_tree_files(file[2], gitdir)
+            for blob in tree:
+                name = file[1] + "/" + blob[0]
+            info.append((name, blob[1]))
+        else:
+            info.append((file[1], file[2]))
+    return info
 
 
 def commit_parse(raw: bytes, start: int = 0, dct=None):
-    # PUT YOUR CODE HERE
-    ...
+    info = {"message": []}
+    for line in raw.decode().split("\n"):
+        if line.startswith(("tree", "parent", "author", "committer")):
+            name, num = line.split(" ", maxsplit=1)
+            info[name] = num
+        else:
+            info["message"].append(line)
+    return info
