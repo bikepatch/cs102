@@ -9,12 +9,12 @@ from .response import WSGIResponse
 class WSGIServer(HTTPServer):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.app: tp.Optional[ApplicationType] = None
+        self.app: tp.Optional[tp.Any] = None
 
-    def set_app(self, app: ApplicationType) -> None:
+    def set_app(self, app: tp.Any) -> None:
         self.app = app
 
-    def get_app(self) -> tp.Optional[ApplicationType]:
+    def get_app(self) -> tp.Optional[tp.Any]:
         return self.app
 
 
@@ -28,5 +28,10 @@ class WSGIRequestHandler(BaseHTTPRequestHandler):
         # вызвать приложение передав ему словарь с переменными окружения и callback'ом
         # ответ приложения представить в виде байтовой строки
         # вернуть объект класса WSGIResponse
-        pass
+        environ = request.to_environ()
+        environ["SERVER_NAME"], environ["SERVER_PORT"] = self.address
+        response = WSGIResponse()
+        app_response = self.server.app(environ, response.start_response)
+        response.body = app_response[0]
+        return response
 
