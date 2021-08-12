@@ -66,22 +66,46 @@ class BaseHTTPRequestHandler(BaseRequestHandler):
         self.close()
 
     def parse_request(self) -> tp.Optional[HTTPRequest]:
-        pass
+        while self._parsed is not True:
+            try:
+                info = self.socket.recv(1024)
+                if len(info) == 0:
+                    break
+                self.parser.feed_data(info)
+            except socket.timeout:
+                print(f"Connection {self.address} timeout")
+                break
+            except (
+                HttpParserError,
+                HttpParserCallbackError,
+                HttpParserInvalidStatusError,
+                HttpParserInvalidMethodError,
+                HttpParserInvalidURLError,
+                HttpParserUpgrade,
+            ) as exc:
+                print(f"Parser error {self.address} - {exc}")
+                break
+        method = self.parser.get_method()
+        if self._parsed:
+            request = self.request_klass(method=method, url=self._url, headers=self._headers, body=self._body)
+            return request
+        return None
 
     def handle_request(self, request: HTTPRequest) -> HTTPResponse:
-        pass
+        return self.response_klass(status=405, headers={}, body=b"")
 
     def handle_response(self, response: HTTPResponse) -> None:
-        pass
+        handled_response = response.to_http1()
+        self.socket.sendall(handled_response)
 
     def on_url(self, url: bytes) -> None:
-        pass
+        self._url += url
 
     def on_header(self, name: bytes, value: bytes) -> None:
-        pass
+        self._headers[name] = value
 
     def on_body(self, body: bytes) -> None:
-        pass
+        self._body += body
 
     def on_message_complete(self) -> None:
-        pass
+        self._parsed = True
