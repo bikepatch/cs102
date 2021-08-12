@@ -14,9 +14,9 @@ class Request:
 
     def text(self) -> tp.Optional[str]:
         # PUT YOUR CODE HERE
-        pass
+        return self.body.read().decode("UTF-8")
 
     def json(self) -> tp.Optional[tp.Dict[str, tp.Any]]:
         # PUT YOUR CODE HERE
-        pass
+        return json.load(self.body)
 
