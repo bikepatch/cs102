@@ -5,6 +5,7 @@ import typing as tp
 
 from vkapi import config, session
 from vkapi.exceptions import APIError
+from vkapi.config import VK_CONFIG
 
 QueryParams = tp.Optional[tp.Dict[str, tp.Union[str, int]]]
 
@@ -71,4 +72,32 @@ def get_mutual(
     :param offset: Смещение, необходимое для выборки определенного подмножества общих друзей.
     :param progress: Callback для отображения прогресса.
     """
-    pass
+    if target_uids is None:
+        if source_uid is None:
+            s_uid = ""
+        else:
+            s_uid = source_uid
+        params = {"access_token": VK_CONFIG["access_token"], "v": VK_CONFIG["version"], "source_uid": s_uid, "target_uid": target_uid, "order": order, }
+        response = session.get(f"friends.getMutual", params=params)
+        info = response.json()
+        if "error" in info or not response.ok:
+            raise APIError(info["error"]["error_msg"])
+        return info["response"]
+    responses = []
+    if progress is None:
+        progress = lambda x: x
+    for i in progress(range(((len(target_uids) + 99) // 100))):
+        if count is None:
+            cnt = ""
+        else:
+            cnt = count
+        params = {"access_token": VK_CONFIG["access_token"], "v": VK_CONFIG["version"], "target_uids": ",".join(map(str, target_uids)), "order": order, "count": cnt, "offset": offset + i * 100, }
+        response = session.get(f"friends.getMutual", params=params)
+        info = response.json()
+        if "error" in info or not response.ok:
+            raise APIError(info["error"]["error_msg"])
+        for arg in info["response"]:
+            responses.append(MutualFriends(id=arg["id"], common_friends=arg["common_friends"], common_count=arg["common_count"],))
+        if i % 3 == 2:
+            time.sleep(1)
+    return responses
