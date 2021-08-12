@@ -20,3 +20,17 @@ class News(Base):
     label = Column(String)
 
 Base.metadata.create_all(bind=engine)
+
+def fill_database(n_pages=10):
+    s = session()
+    news_list = get_news('https://news.ycombinator.com/newest', n_pages)
+    for item in news_list:
+        news = News(
+            title=item['title'],
+            author=item['author'],
+            url=item['url'],
+            comments=item['comments'],
+            points=item['points']
+        )
+        s.add(news)
+    s.commit()
