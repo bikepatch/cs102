@@ -19,12 +19,14 @@ def age_predict(user_id: int) -> tp.Optional[float]:
     friends = get_friends(user_id, "bdate").items
     for friend in friends:
         try:
-            bdate = dt.datetime.strptime(friend['bdate'], '%d.%m.%Y')
+            bdate = dt.datetime.strptime(friend["bdate"], "%d.%m.%Y")
             current_time = dt.datetime.today()
             age = current_time.year - bdate.year
-            if (bdate.month > current_time.month) or (bdate.month == current_time.month and bdate.day > current_time.day):
+            if (bdate.month > current_time.month) or (
+                bdate.month == current_time.month and bdate.day > current_time.day
+            ):
                 age -= 1
-            ages.append(age) 
+            ages.append(age)
         except (KeyError, ValueError):
             continue
     try:

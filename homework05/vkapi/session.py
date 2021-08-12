@@ -19,6 +19,7 @@ class TimeoutHTTPAdapter(HTTPAdapter):
             kwargs["timeout"] = self.timeout
         return super().send(request, **kwargs)
 
+
 class Session(requests.Session):
     """
     Сессия.
@@ -38,7 +39,11 @@ class Session(requests.Session):
     ) -> None:
         super().__init__()
         self.base_url = base_url
-        retry = Retry(total=max_retries, status_forcelist=[500, 501, 502, 503, 504], backoff_factor=backoff_factor,)
+        retry = Retry(
+            total=max_retries,
+            status_forcelist=[500, 501, 502, 503, 504],
+            backoff_factor=backoff_factor,
+        )
         adapter = TimeoutHTTPAdapter(timeout=timeout, max_retries=retry)
         self.mount(self.base_url, adapter)
 
