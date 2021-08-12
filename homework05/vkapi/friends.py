@@ -28,7 +28,21 @@ def get_friends(
     :param fields: Список полей, которые нужно получить для каждого пользователя.
     :return: Список идентификаторов друзей пользователя или список пользователей.
     """
-    pass
+    if user_id is None:
+        u_id = ""
+    else:
+        u_id = user_id
+    if fields is None:
+        flds = ""
+    else:
+        flds = ",".join(fields) 
+    user_data = {"access_token": config.VK_CONFIG["access_token"], "v": config.VK_CONFIG["version"], "count": count, "user_id": u_id, "fields": flds, "offset": offset, }
+    response = session.get("friends.get", params=user_data)
+    info = response.json()
+    if "error" in info or not response.ok:
+        raise APIError(info["error"]["error_msg"])
+    else:
+        return FriendsResponse(count=info["response"]["count"], items=info["response"]["items"], )
 
 
 class MutualFriends(tp.TypedDict):
