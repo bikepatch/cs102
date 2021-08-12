@@ -33,5 +33,33 @@ def commit_tree(
     parent: tp.Optional[str] = None,
     author: tp.Optional[str] = None,
 ) -> str:
-    # PUT YOUR CODE HERE
-    ...
+    info_time = str(int(time.mktime(time.localtime()))).encode()
+    timezone = "{:+}00".format(int(time.timezone / -3600)).zfill(5).encode()
+    if author is None:
+        author = "{} <{}>".format(os.getenv("GIT_AUTHOR_NAME"), os.getenv("GIT_AUTHOR_EMAIL"))
+    assert isinstance(author, str)
+    if not parent:
+        info = b"tree %s\nauthor %s %s %s\ncommitter %s %s %s\n\n%s\n" % (
+            tree.encode(),
+            author.encode(),
+            info_time,
+            timezone,
+            author.encode(),
+            info_time,
+            timezone,
+            message.encode(),
+        )
+    else:
+        assert isinstance(parent, str)
+        info = b"tree %s\nparent %s\nauthor %s %s %s\ncommitter %s %s %s\n\n%s\n" % (
+            tree.encode(),
+            parent.encode(),
+            author.encode(),
+            info_time,
+            timezone,
+            author.encode(),
+            info_time,
+            timezone,
+            message.encode(),
+        )
+    return hash_object(info, fmt="commit", write=True)

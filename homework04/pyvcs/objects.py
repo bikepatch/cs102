@@ -51,14 +51,15 @@ def read_object(sha: str, gitdir: pathlib.Path) -> tp.Tuple[str, bytes]:
 
 def read_tree(data: bytes) -> tp.List[tp.Tuple[int, str, str]]:
     tree = []
-    while len(data) != 0:
-        data = data[data.find(b" ") + 1 :]
-        data = data[data.find(b"\x00") + 1 :]
-        sha = bytes.hex(data[:20])
-        mode = int(data[: data.find(b" ")].decode())
-        name = data[: data.find(b"\x00")].decode()
-        data = data[20:]
-        tree.append((mode, name, sha))
+    while data:
+        pos = data.index(b"\00")
+        info = data[:pos].split(b" ")
+        mapa = list(map(lambda x: x.decode(), info))
+        mode = mapa[0]
+        name = mapa[1]
+        sha = data[pos + 1 : pos + 21]
+        tree.append((int(mode), str(sha.hex()), str(name)))
+        data = data[pos + 21 :]
     return tree
 
 
@@ -69,7 +70,7 @@ def cat_file(obj_name: str, pretty: bool = True) -> None:
         print(data.decode())
     else:
         for leaf in read_tree(data):
-            if i[0] == 40000:
+            if leaf[0] == 40000:
                 print(f"{leaf[0]:06}", "tree", leaf[1] + "\t" + leaf[2])
             else:
                 print(f"{leaf[0]:06}", "blob", leaf[1] + "\t" + leaf[2])
