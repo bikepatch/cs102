@@ -12,15 +12,17 @@ def encrypt_vigenere(plaintext: str, keyword: str) -> str:
     ciphertext = ""
     for i, symbol in enumerate(plaintext):
         cipher = symbol
-        if 'A' <= symbol <= 'z':
+        if "A" <= symbol <= "z":
             length = len(keyword)
             shift = ord(keyword[i % length])
-            if 'a' <= symbol <= 'z':
-                shift -= ord('a')
+            if "a" <= symbol <= "z":
+                shift -= ord("a")
             else:
-                shift -= ord('A')
+                shift -= ord("A")
             enc = ord(symbol) + shift
-            if ('a' <= symbol <= 'z' and enc > ord('z')) or ('A' <= symbol <= 'Z' and enc > ord('Z')):
+            if ("a" <= symbol <= "z" and enc > ord("z")) or (
+                "A" <= symbol <= "Z" and enc > ord("Z")
+            ):
                 enc -= 26
             cipher = chr(enc)
         ciphertext += cipher
@@ -41,14 +43,16 @@ def decrypt_vigenere(ciphertext: str, keyword: str) -> str:
     plaintext = ""
     for i, cipher in enumerate(ciphertext):
         s = cipher
-        if 'A' <= cipher <= 'z':
+        if "A" <= cipher <= "z":
             shift = ord(keyword[i % len(keyword)])
-            if 'a' <= cipher <= 'z':
-                shift -= ord('a')
+            if "a" <= cipher <= "z":
+                shift -= ord("a")
             else:
-                shift -= ord('A')
+                shift -= ord("A")
             enc = ord(cipher) - shift
-            if ('a' <= cipher <= 'z' and enc < ord('a')) or ('A' <= cipher <= 'Z' and enc < ord('A')):
+            if ("a" <= cipher <= "z" and enc < ord("a")) or (
+                "A" <= cipher <= "Z" and enc < ord("A")
+            ):
                 enc += 26
             s = chr(enc)
         plaintext += s
