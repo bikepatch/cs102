@@ -46,7 +46,9 @@ def multiplicative_inverse(e: int, phi: int) -> int:
     d = []
     while tmp_phi % tmp_e != 0:
         d.append(tmp_phi // tmp_e)
-        tmp_phi, tmp_e = tmp_e, tmp_phi % tmp_e
+        tmp = tmp_phi
+        tmp_phi = tmp_e
+        tmp_e = tmp % tmp_e
     a = 0
     b = 1
     for i in range(len(d)):
