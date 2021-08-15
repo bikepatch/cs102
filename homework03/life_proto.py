@@ -30,14 +30,14 @@ class GameOfLife:
         self.speed = speed
 
     def draw_lines(self) -> None:
-        """ Отрисовать сетку """
+        """Отрисовать сетку"""
         for x in range(0, self.width, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color("black"), (x, 0), (x, self.height))
         for y in range(0, self.height, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color("black"), (0, y), (self.width, y))
 
     def run(self) -> None:
-        """ Запустить игру """
+        """Запустить игру"""
         pygame.init()
         clock = pygame.time.Clock()
         pygame.display.set_caption("Game of Life")
@@ -49,7 +49,7 @@ class GameOfLife:
         running = True
         while running:
             for event in pygame.event.get():
-                if event.type == QUIT:
+                if event.type == pygame.QUIT:
                     running = False
             self.draw_lines()
             self.draw_grid()
@@ -93,11 +93,13 @@ class GameOfLife:
         for i in range(self.cell_height):
             for j in range(self.cell_width):
                 if not self.grid[i][j]:
-                    col = pygame.Color('white')
+                    col = pygame.Color("white")
                 else:
-                    col = pygame.Color('green')
+                    col = pygame.Color("green")
                 tmp = self.cell_size - 1
-                pygame.draw.rect(self.screen, col, (j * self.cell_size + 1, i * self.cell_size + 1, tmp, tmp))
+                pygame.draw.rect(
+                    self.screen, col, (j * self.cell_size + 1, i * self.cell_size + 1, tmp, tmp)
+                )
 
     def get_neighbours(self, cell: Cell) -> Cells:
         """

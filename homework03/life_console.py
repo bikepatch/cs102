@@ -9,17 +9,17 @@ class Console(UI):
         super().__init__(life)
 
     def draw_borders(self, screen) -> None:
-        """ Отобразить рамку. """
+        """Отобразить рамку."""
         screen.border(0)
 
     def draw_grid(self, screen) -> None:
-        """ Отобразить состояние клеток. """
+        """Отобразить состояние клеток."""
         for i in range(self.life.rows):
             for j in range(self.life.cols):
                 if not self.life.curr_generation[i][j]:
-                    screen.addch(i + 1, j + 1, ' ')
+                    screen.addch(i + 1, j + 1, " ")
                 else:
-                    screen.addch(i + 1, j + 1, '*')
+                    screen.addch(i + 1, j + 1, "*")
 
     def run(self) -> None:
         screen = curses.initscr()
@@ -31,6 +31,6 @@ class Console(UI):
             self.draw_grid(screen)
             screen.refresh()
             self.life.step()
-            if self.life.is_max_generations_exceed:
+            if self.life.is_max_generations_exceeded:
                 flag = False
         curses.endwin()

@@ -1,7 +1,7 @@
 import pathlib
 import random
-from random import randint
 import typing as tp
+from random import randint
 
 import pygame
 from pygame.locals import *
@@ -96,7 +96,7 @@ class GameOfLife:
         width = 0
         grid = []
         for line in f:
-            row = [int(i) for i in line if i in '01']
+            row = [int(i) for i in line if i in "01"]
             grid.append(row)
             width = len(row)
             height += 1
@@ -110,9 +110,9 @@ class GameOfLife:
         """
         Сохранить текущее состояние клеток в указанный файл.
         """
-        f = open(filename, 'w')
+        f = open(filename, "w")
         for i in range(self.rows):
             for j in range(self.cols):
                 f.write(str(self.curr_generation[i][j]))
-            f.write('\n')
+            f.write("\n")
         f.close()
