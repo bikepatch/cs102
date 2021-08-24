@@ -166,6 +166,7 @@ def solve(grid: tp.List[tp.List[str]]) -> tp.Optional[tp.List[tp.List[str]]]:
             else:
                 return grid
         grid[position[0]][position[1]] = "."
+    return grid
 
 
 def check_solution(solution: tp.List[tp.List[str]]) -> bool:
@@ -213,7 +214,7 @@ def generate_sudoku(N: int) -> tp.List[tp.List[str]]:
     True
     """
     grid = [["." for _ in range(9)] for _ in range(9)]
-    grid = solve(grid)
+    grid = solve(grid)  # type: ignore
     missed = 0
     while N + missed < 81:
         x = randint(0, 8)
