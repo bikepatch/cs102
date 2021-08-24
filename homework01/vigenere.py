@@ -12,19 +12,15 @@ def encrypt_vigenere(plaintext: str, keyword: str) -> str:
     ciphertext = ""
     for i, symbol in enumerate(plaintext):
         cipher = symbol
-        if "A" <= symbol <= "z":
-            length = len(keyword)
-            shift = ord(keyword[i % length])
-            if "a" <= symbol <= "z":
-                shift -= ord("a")
+        length = len(keyword)
+        shift = ord(keyword[i % length]) % 32 - 1
+        if ("A" <= symbol <= "Z") or ("a" <= symbol <= "z"):
+            if 0 <= ord(symbol) - ord("A") <= 25:
+                tmp = (ord(symbol) - ord("A") + shift) % 26
+                cipher = chr(tmp + ord("A"))
             else:
-                shift -= ord("A")
-            enc = ord(symbol) + shift
-            if ("a" <= symbol <= "z" and enc > ord("z")) or (
-                "A" <= symbol <= "Z" and enc > ord("Z")
-            ):
-                enc -= 26
-            cipher = chr(enc)
+                tmp = (ord(symbol) - ord("a") + shift) % 26
+                cipher = chr(tmp + ord("a"))
         ciphertext += cipher
     return ciphertext
 
@@ -43,17 +39,14 @@ def decrypt_vigenere(ciphertext: str, keyword: str) -> str:
     plaintext = ""
     for i, cipher in enumerate(ciphertext):
         s = cipher
-        if "A" <= cipher <= "z":
-            shift = ord(keyword[i % len(keyword)])
-            if "a" <= cipher <= "z":
-                shift -= ord("a")
+        length = len(keyword)
+        shift = ord(keyword[i % length]) % 32 - 1
+        if ("A" <= cipher <= "Z") or ("a" <= cipher <= "z"):
+            if 0 <= ord(cipher) - ord("A") <= 25:
+                tmp = (ord(cipher) - ord("A") - shift) % 26
+                s = chr(tmp + ord("A"))
             else:
-                shift -= ord("A")
-            enc = ord(cipher) - shift
-            if ("a" <= cipher <= "z" and enc < ord("a")) or (
-                "A" <= cipher <= "Z" and enc < ord("A")
-            ):
-                enc += 26
-            s = chr(enc)
+                tmp = (ord(cipher) - ord("a") - shift) % 26
+                s = chr(tmp + ord("a"))
         plaintext += s
     return plaintext

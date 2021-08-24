@@ -13,10 +13,18 @@ def is_prime(n: int) -> bool:
     >>> is_prime(8)
     False
     """
-    k = 2
-    while n % k != 0:
-        k += 1
-    return k == n
+    k = 5
+    if n <= 1:
+        return False
+    if n <= 3:
+        return True
+    if n % 2 == 0:
+        return False
+    while k * k <= n:
+        if n % k == 0:
+            return False
+        k += 2
+    return True
 
 
 def gcd(a: int, b: int) -> int:
