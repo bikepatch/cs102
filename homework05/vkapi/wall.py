@@ -1,6 +1,6 @@
+import math
 import textwrap
 import time
-import math
 import typing as tp
 from string import Template
 
@@ -8,8 +8,8 @@ import pandas as pd
 from pandas import json_normalize
 
 from vkapi import config, session
-from vkapi.exceptions import APIError
 from vkapi.config import VK_CONFIG
+from vkapi.exceptions import APIError
 
 
 def get_posts_2500(
@@ -44,10 +44,10 @@ def get_posts_2500(
         "v": VK_CONFIG["version"],
     }
     response = session.post("execute", data=data)
-    ans = response.json()
-    if "error" in ans or not response.ok:
-        raise APIError(doc["error"]["error_msg"])
-    return ans["response"]["items"]
+    answer = response.json()
+    if not response.ok or "error" in answer:
+        raise APIError(answer["error"]["error_msg"])
+    return answer["response"]["items"]
 
 
 def get_wall_execute(

@@ -16,10 +16,10 @@ def age_predict(user_id: int) -> tp.Optional[float]:
     """
     assert user_id > 0, "user_id must be positive integer"
     ages = []
-    friends = get_friends(user_id, "bdate").items
+    friends = get_friends(user_id, "bdate").items # type: ignore
     for friend in friends:
         try:
-            bdate = dt.datetime.strptime(friend["bdate"], "%d.%m.%Y")
+            bdate = dt.datetime.strptime(friend["bdate"], "%d.%m.%Y") # type: ignore
             current_time = dt.datetime.today()
             age = current_time.year - bdate.year
             if (bdate.month > current_time.month) or (

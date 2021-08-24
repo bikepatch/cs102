@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 
-from vkapi.friends import get_friends, get_mutual, MutualFriends
+from vkapi.friends import MutualFriends, get_friends, get_mutual
 
 
 def ego_network(
@@ -20,7 +20,7 @@ def ego_network(
     """
     graph = []
     if friends is None:
-        fields = get_friends(user_id, fields=["nickname", "is_closed, deactivate"]).items
+        fields: tp.List[tp.Dict[str, tp.Any]] = get_friends(user_id, fields=["nickname", "is_closed, deactivate"]).items  # type: ignore
         friends = []
         for friend in fields:
             if not (friend.get("deactivate") or friend.get("is_closed")):

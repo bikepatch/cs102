@@ -4,8 +4,8 @@ import time
 import typing as tp
 
 from vkapi import config, session
-from vkapi.exceptions import APIError
 from vkapi.config import VK_CONFIG
+from vkapi.exceptions import APIError
 
 QueryParams = tp.Optional[tp.Dict[str, tp.Union[str, int]]]
 
@@ -32,7 +32,7 @@ def get_friends(
     if user_id is None:
         u_id = ""
     else:
-        u_id = user_id
+        u_id = str(user_id)
     if fields is None:
         flds = ""
     else:
@@ -86,7 +86,7 @@ def get_mutual(
         if source_uid is None:
             s_uid = ""
         else:
-            s_uid = source_uid
+            s_uid = str(source_uid)
         params = {
             "access_token": VK_CONFIG["access_token"],
             "v": VK_CONFIG["version"],
@@ -106,7 +106,7 @@ def get_mutual(
         if count is None:
             cnt = ""
         else:
-            cnt = count
+            cnt = str(count)
         params = {
             "access_token": VK_CONFIG["access_token"],
             "v": VK_CONFIG["version"],
