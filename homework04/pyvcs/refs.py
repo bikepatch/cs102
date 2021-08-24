@@ -13,7 +13,7 @@ def symbolic_ref(gitdir: pathlib.Path, name: str, ref: str) -> None:
     pass
 
 
-def ref_resolve(gitdir: pathlib.Path, refname: str) -> str:
+def ref_resolve(gitdir: pathlib.Path, refname: str) -> tp.Optional[str]:
     path = gitdir / refname
     if refname == "HEAD":
         with open(path, "r") as f:

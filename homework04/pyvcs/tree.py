@@ -17,11 +17,19 @@ def write_tree(gitdir: pathlib.Path, index: tp.List[GitIndexEntry], dirname: str
             subdir = b""
             dirictory = entry.name[: entry.name.find("/")]
             history += dirictory.encode() + b"\0"
-            subdir += oct(entry.mode)[2:].encode() + b" " + entry.name[entry.name.find("/") + 1 :].encode() + b"\0" + entry.sha1
+            subdir += (
+                oct(entry.mode)[2:].encode()
+                + b" "
+                + entry.name[entry.name.find("/") + 1 :].encode()
+                + b"\0"
+                + entry.sha1
+            )
             hash_obj = hash_object(subdir, fmt="tree", write=True)
             history += bytes.fromhex(hash_obj)
         else:
-            history += oct(entry.mode)[2:].encode() + b" " + entry.name.encode() + b"\0" + entry.sha1
+            history += (
+                oct(entry.mode)[2:].encode() + b" " + entry.name.encode() + b"\0" + entry.sha1
+            )
     tree = hash_object(history, fmt="tree", write=True)
     return tree
 

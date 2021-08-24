@@ -41,7 +41,7 @@ def find_object(obj_name: str, gitdir: pathlib.Path) -> str:
 
 
 def read_object(sha: str, gitdir: pathlib.Path) -> tp.Tuple[str, bytes]:
-    path = repo_find(gitdir) / "objects" / sha[:2] 
+    path = repo_find(gitdir) / "objects" / sha[:2]
     with open(path / sha[2:], "rb") as f:
         z_data = zlib.decompress(f.read())
     header = z_data.split(b" ")[0]
@@ -91,7 +91,7 @@ def find_tree_files(tree_sha: str, gitdir: pathlib.Path) -> tp.List[tp.Tuple[str
 
 
 def commit_parse(raw: bytes, start: int = 0, dct=None):
-    info = {"message": []}
+    info: tp.Dict[str, tp.Any] = {"message": []}
     for line in raw.decode().split("\n"):
         if line.startswith(("tree", "parent", "author", "committer")):
             name, num = line.split(" ", maxsplit=1)
