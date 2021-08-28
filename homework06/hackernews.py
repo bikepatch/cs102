@@ -5,7 +5,18 @@ from bottle import (
 from scraputils import get_news
 from db import News, session
 from bayes import NaiveBayesClassifier
-from sqlalchemy.orm import load_only
+from textblob import Word, TextBlob
+
+classifier = None  # объявляем классификатор
+
+
+def normalize(text: str) -> list:
+    text = text.lower()  # переводим все в нижний регистр
+    text.replace('-', ' ').replace('_', ' ').replace('/', ' ')  # заменяем знаки пробелами
+    text = ''.join(
+        [char for char in text if char in 'abcdefghijklmnopqrstuvwxyz ']
+        )  # оставляем только английские буквы и пробелы
+    return list(TextBlob(text).words.lemmatize())  # разделяем предложение на список лемматизированных слов
 
 
 @route("/news")
@@ -28,49 +39,44 @@ def add_label():
 @route("/update")
 def update_news():
     s = session()
-    list_n = get_news('https://news.ycombinator.com/', 5)
-    old = s.query(News).all()
-    old_list = []
-    for news in old:
-        old_list.append((news.title, news.author) )
-    for news in list_n:
-        if (news['title'], news['author']) not in old_list:
-            add = News(
-                title=news['title'],
-                author=news['author'],
-                url=news['url'],
-                comments=news['comments'],
-                points=news['points'],
-                label=None)
-            s.add(add)
-            print(news)
+    news_list = get_news('https://news.ycombinator.com/', 1)
+    count = 0
+    for n in news_list:
+        news = News(
+            title=n['title'],
+            author=n['author'],
+            url=n['url'],
+            comments=n['comments'],
+            points=n['points']
+        )
+        in_database = False
+        for row in s.query(News).all():
+            if row.title == news.title and row.author == news.author:
+                print('"{}" by {} is already in database'.format(row.title, row.author))
+                in_database = True
+                break
+        if not in_database:
+            s.add(news)
+            count += 1
     s.commit()
+    print(f'Added {count} news to database')
     redirect("/news")
 
 
 @route("/classify")
 def classify_news():
     s = session()
-    classifier = NaiveBayesClassifier()
-    train_news = s.query(News).filter(News.label is not None).options(load_only("title", "label")).all()
-    x_train = [row.title for row in train_news]
-    y_train = [row.label for row in train_news]
-    classifier.fit(x_train, y_train)
-    test_news = s.query(News).filter(News.label is None).all()
-    x = [row.title for row in test_news]
-    labels = classifier.predict(x)
-    good = []
-    maybe = []
-    never = []
-    for i in range(len(test_news)):
-        if labels[i] == 'good':
-            good.append(test_news[i])
-        if labels[i] == 'maybe':
-            maybe.append(test_news[i])
-        if labels[i] == 'never':
-            never.append(test_news[i])
-
-    return template('recommendations_template', {'good': good, 'never': never, 'maybe': maybe})
+    global classifier
+    classifier = NaiveBayesClassifier(alpha=1)
+    titles = [str(t[0]) for t in s.query(News.title).filter(News.label != None).all()]
+    labels = [str(l[0]) for l in s.query(News.label).filter(News.label != None).all()]
+    normalized= [] # со стертыми лишними знаками
+    for title in titles:
+        normalized.append(normalize(title))
+    classifier.fit(normalized[:168], labels[:168])
+    print('score:', classifier.score(normalized[168:], labels[168:]))
+    print('label freq:', classifier.y_frequency)
+    return redirect("/recommendations")
 
 
 @route('/recommendations')
