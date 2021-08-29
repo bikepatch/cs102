@@ -1,8 +1,9 @@
 import socket
 import threading
 import typing as tp
-
-from .handlers import BaseRequestHandler
+import concurrent
+from concurrent.futures import ThreadPoolExecutor
+from .handlers import BaseRequestHandler, Address
 
 
 class TCPServer:
@@ -12,7 +13,7 @@ class TCPServer:
         port: int = 5000,
         backlog_size: int = 1,
         max_workers: int = 1,
-        timeout: tp.Optional[float] = None,
+        timeout: tp.Optional[float] = 3,
         request_handler_cls: tp.Type[BaseRequestHandler] = BaseRequestHandler,
     ) -> None:
         self.host = host
@@ -36,16 +37,16 @@ class TCPServer:
         server_socket.listen(self.backlog_size)
         print(f"Server working on {self.host}:{self.port}")
         with ThreadPoolExecutor(max_workers=self.max_workers) as exec:
-            items = []
+            subs = []
             try:
                 while True:
                     client_socket, address = server_socket.accept()
                     client_socket.settimeout(self.timeout)
-                    items.append(exec.submit(self.handle_accept, client_socket))
+                    subs.append(exec.submit(self.handle_accept, client_socket))
             except KeyboardInterrupt:
-                for item in items:
-                    item.cancel()
-                concurrent.items.wait(items, timeout=self.timeout)
+                for sub in subs:
+                    sub.cancel()
+                concurrent.futures.wait(subs, timeout=self.timeout)
                 print("\nGot SIGTERM, terminated...")
         server_socket.close()
 

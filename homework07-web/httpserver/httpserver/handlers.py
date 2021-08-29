@@ -4,9 +4,19 @@ import socket
 import typing as tp
 
 from httptools import HttpRequestParser
+from httptools.parser.errors import (
+    HttpParserError,
+    HttpParserCallbackError,
+    HttpParserInvalidStatusError,
+    HttpParserInvalidMethodError,
+    HttpParserInvalidURLError,
+    HttpParserUpgrade,
+)
 
 from .request import HTTPRequest
 from .response import HTTPResponse
+
+from collections import defaultdict
 
 if tp.TYPE_CHECKING:
     from .server import TCPServer
@@ -40,15 +50,15 @@ class EchoRequestHandler(BaseRequestHandler):
 
 
 class BaseHTTPRequestHandler(BaseRequestHandler):
-    request_klass = HTTPRequest
-    response_klass = HTTPResponse
+    request_http = HTTPRequest
+    response_http = HTTPResponse
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.parser = HttpRequestParser(self)
 
         self._url: bytes = b""
-        self._headers: tp.Dict[bytes, bytes] = {}
+        self._headers: tp.DefaultDict[bytes, bytes] = defaultdict()
         self._body: bytes = b""
         self._parsed = False
 
@@ -57,11 +67,11 @@ class BaseHTTPRequestHandler(BaseRequestHandler):
         if request:
             try:
                 response = self.handle_request(request)
-            except Exception:
-                # TODO: log exception
-                response = self.response_klass(status=500, headers={}, body=b"")
+            except Exception as exc:
+                print(f"Got exception - {exc}, returned 500")
+                response = self.response_http(status=500, headers={}, body=b"")
         else:
-            response = self.response_klass(status=400, headers={}, body=b"")
+            response = self.response_http(status=400, headers={}, body=b"")
         self.handle_response(response)
         self.close()
 
@@ -85,27 +95,28 @@ class BaseHTTPRequestHandler(BaseRequestHandler):
             ) as exc:
                 print(f"Parser error {self.address} - {exc}")
                 break
-        method = self.parser.get_method()
         if self._parsed:
-            request = self.request_klass(method=method, url=self._url, headers=self._headers, body=self._body)
-            return request
+            method = self.parser.get_method()
+            return self.request_http(
+                method=method, url=self._url, headers=self._headers, body=self._body
+            )
         return None
 
-    def handle_request(self, request: HTTPRequest) -> HTTPResponse:
-        return self.response_klass(status=405, headers={}, body=b"")
+    def handle_request(self, request: HTTPRequest, status: int = 405) -> HTTPResponse:
+        return self.response_http(status=status, headers={}, body=b"")
 
     def handle_response(self, response: HTTPResponse) -> None:
         handled_response = response.to_http1()
         self.socket.sendall(handled_response)
 
     def on_url(self, url: bytes) -> None:
-        self._url += url
+        self._url = url
 
     def on_header(self, name: bytes, value: bytes) -> None:
         self._headers[name] = value
 
     def on_body(self, body: bytes) -> None:
-        self._body += body
+        self._body = body
 
     def on_message_complete(self) -> None:
         self._parsed = True
