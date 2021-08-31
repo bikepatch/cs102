@@ -1,10 +1,9 @@
+import pyvcs
 from setuptools import setup
 
-import pyvcs
-
-AUTHOR = "Dmitrii Sorokin"
-AUTHOR_EMAIL = "dementiy@yandex.ru"
-HOME_PAGE = "https://github.com/Dementiy/pybook-assignments"
+AUTHOR = "Ivan Fomenko"
+AUTHOR_EMAIL = "ivanivanfomenko@gmail.com"
+HOME_PAGE = "https://github.com/bikepatch/cs102"
 
 setup(
     name="pyvcs",
